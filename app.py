@@ -13,9 +13,17 @@ db = client['flask_auth_db']
 users = db.users
 admins = db.admins
 
+# ====================== HOME PAGE =========================
 @app.route('/')
 def home():
-    return redirect(url_for('login'))
+    # If the user is logged in, redirect to the dashboard
+    if 'user' in session:
+        return redirect(url_for('dashboard'))
+    # If the admin is logged in, redirect to the admin dashboard
+    elif 'admin' in session:
+        return redirect(url_for('admin_dashboard'))
+    # If no one is logged in, show the homepage with login and register options
+    return render_template('home.html')
 
 # ====================== USER AUTH =========================
 @app.route('/register', methods=['GET', 'POST'])
@@ -84,7 +92,7 @@ def admin_dashboard():
     else:
         all_users = users.find()
 
-    return render_template('admin.html', users=all_users)
+    return render_template('admin_dashboard.html', users=all_users)
 
 @app.route('/delete_user/<user_id>')
 def delete_user(user_id):
@@ -104,11 +112,7 @@ def logout():
     flash('Logged out successfully.')
     return redirect(url_for('login'))
 
-
-
-# Your existing code
-
+# Run the app
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Use Render's port or default to 5000
+    port = int(os.environ.get('PORT', 5001))  # Use Render's port or default to 5000
     app.run(host='0.0.0.0', port=port, debug=True)
-
